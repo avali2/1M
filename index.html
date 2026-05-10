@@ -474,9 +474,25 @@
 
   /* HERO BANNER (la decisión grande para mirar de un vistazo) */
   .hero-banner {
-    background: linear-gradient(135deg, #0e1628 0%, #131829 100%);
+    background: linear-gradient(135deg, #0e1628 0%, #131829 50%, #1a1f3a 100%);
+    background-size: 200% 200%;
+    animation: bgShift 12s ease infinite;
     border-bottom: 1px solid var(--border);
-    padding: 20px 16px 24px;
+    padding: 22px 16px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 20%, rgba(212,160,23,0.06), transparent 50%);
+    pointer-events: none;
+  }
+  @keyframes bgShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
   .hero-inner { max-width: 1600px; margin: 0 auto; }
   .hero-meta {
@@ -820,6 +836,78 @@
     margin-top: 8px;
   }
 
+  /* INSTITUTIONAL LEVELS */
+  .inst-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .inst-stat {
+    background: var(--bg-elevated);
+    padding: 10px 8px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .inst-stat .label {
+    font-size: 9.5px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+  }
+  .inst-stat .value {
+    font-family: var(--font-mono); font-weight: 800; font-size: 16px;
+    margin-top: 4px; font-feature-settings: 'tnum';
+  }
+  .inst-stat .sub {
+    font-size: 10px; color: var(--text-muted); margin-top: 2px;
+  }
+  .inst-section { margin-bottom: 16px; }
+  .inst-section-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-secondary); font-weight: 700; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .inst-bar {
+    display: grid; grid-template-columns: 70px 1fr 60px 50px;
+    gap: 8px; align-items: center;
+    padding: 6px 0; font-size: 12px;
+  }
+  .inst-bar .strike {
+    font-family: var(--font-mono); font-weight: 700;
+    color: var(--text-primary);
+  }
+  .inst-bar .visual {
+    background: var(--bg-elevated); height: 14px; border-radius: 4px;
+    overflow: hidden; position: relative;
+  }
+  .inst-bar .visual .fill {
+    height: 100%; border-radius: 4px;
+    transition: width 0.3s;
+  }
+  .inst-bar.support .fill { background: linear-gradient(90deg, var(--success), #059669); }
+  .inst-bar.resistance .fill { background: linear-gradient(90deg, var(--danger), #b91c1c); }
+  .inst-bar .oi {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--text-secondary); text-align: right;
+  }
+  .inst-bar .dist {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-muted); text-align: right;
+  }
+  .inst-bar.is-our-short {
+    background: rgba(212,160,23,0.08);
+    border-left: 2px solid var(--accent-gold);
+    padding-left: 6px; margin-left: -8px;
+  }
+  .inst-bar.is-our-short .strike { color: var(--accent-gold); }
+  .inst-alert {
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 12.5px; line-height: 1.5; margin-top: 12px;
+  }
+  .inst-alert.good { background: rgba(16,185,129,0.1); border-left: 3px solid var(--success); color: var(--success); }
+  .inst-alert.warn { background: rgba(245,158,11,0.1); border-left: 3px solid var(--warning); color: var(--warning); }
+  .inst-alert.danger { background: rgba(239,68,68,0.1); border-left: 3px solid var(--danger); color: var(--danger); }
+  .inst-alert b { color: inherit; }
+
   /* TUTORIAL */
   .tutorial-modal { max-width: 540px; }
   .tutorial-progress {
@@ -1100,6 +1188,13 @@
       <div id="tvChartContainer" class="tv-container"></div>
     </div>
 
+    <div class="card" id="institutionalCard">
+      <h2>🏛 Niveles institucionales (Open Interest real) <span class="info-btn" data-info="institutional">?</span></h2>
+      <div id="institutionalContent">
+        <div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Cargando datos del options chain…</div>
+      </div>
+    </div>
+
     <div class="card" id="payoffCard">
       <h2>Diagrama de payoff <span class="info-btn" data-info="payoff">?</span></h2>
       <div id="payoffChart" class="payoff-container"></div>
@@ -1289,31 +1384,13 @@ const UNDERLYINGS = {
          volProxy:'^VIX', volProxyName:'VIX', minCapital:2000,
          description:'⭐ MEJOR para cuenta chica: cash-settled, European-style, tax 60/40 (Sec 1256), sin asignación.',
          brokerOk:'Tastytrade, IBKR, ToS, Webull. Robinhood NO lo soporta.' },
-  QQQ: { name:'Invesco Nasdaq-100 ETF', symbol:'QQQ', yahoo:'QQQ', tvSymbol:'NASDAQ:QQQ', type:'ETF', settlement:'physical',
-         strikeIncrement:1, callWingWidth:1, putWingWidth:1.5, minCredit:0.20,
-         volProxy:'^VXN', volProxyName:'VXN', minCapital:3000,
-         description:'Más volátil que SPY. Mejor crédito pero mayor riesgo.',
-         brokerOk:'Robinhood/Webull. Approval Lvl 3.' },
-  IWM: { name:'iShares Russell 2000 ETF', symbol:'IWM', yahoo:'IWM', tvSymbol:'AMEX:IWM', type:'ETF', settlement:'physical',
-         strikeIncrement:1, callWingWidth:1, putWingWidth:1.5, minCredit:0.15,
-         volProxy:'^RVX', volProxyName:'RVX', minCapital:2000,
-         description:'Small caps, más beta. OK para cuentas chicas.',
-         brokerOk:'Robinhood/Webull. Approval Lvl 3.' },
-  NDX: { name:'Nasdaq-100 Index', symbol:'NDX', yahoo:'^NDX', tvSymbol:'NASDAQ:NDX', type:'Index', settlement:'cash',
-         strikeIncrement:10, callWingWidth:25, putWingWidth:40, minCredit:5.00,
-         volProxy:'^VXN', volProxyName:'VXN', minCapital:50000,
-         description:'Cash-settled. Capital muy alto requerido ($50K+).',
-         brokerOk:'NO Robinhood. Tastytrade, IBKR, ToS.' },
-  RUT: { name:'Russell 2000 Index', symbol:'RUT', yahoo:'^RUT', tvSymbol:'TVC:RUT', type:'Index', settlement:'cash',
-         strikeIncrement:5, callWingWidth:10, putWingWidth:15, minCredit:1.50,
-         volProxy:'^RVX', volProxyName:'RVX', minCapital:15000,
-         description:'Cash-settled, small caps. Capital $15K+.',
-         brokerOk:'NO Robinhood. Tastytrade, IBKR.' },
-  DIA: { name:'SPDR Dow Jones ETF', symbol:'DIA', yahoo:'DIA', tvSymbol:'AMEX:DIA', type:'ETF', settlement:'physical',
-         strikeIncrement:1, callWingWidth:1, putWingWidth:1.5, minCredit:0.18,
+  MSFT: { name:'Microsoft Corp', symbol:'MSFT', yahoo:'MSFT', tvSymbol:'NASDAQ:MSFT', type:'Stock', settlement:'physical',
+         strikeIncrement:2.5, callWingWidth:2.5, putWingWidth:5, minCredit:0.40,
          volProxy:'^VIX', volProxyName:'VIX (proxy)', minCapital:5000,
-         description:'Menos líquido. Solo si tenés experiencia.',
-         brokerOk:'Robinhood/Webull. Approval Lvl 3.' }
+         creditMultiplierBoost: 1.6, // MSFT tiene IV ~1.6x SPY
+         isHighRisk: true,
+         description:'⚠ Single-stock = riesgo de earnings 4x/año + headline risk. Mayor crédito pero gap risk alto.',
+         brokerOk:'Robinhood/Webull/Tastytrade/IBKR. Approval Lvl 3.' }
 };
 
 // ===== Z-scores empíricos para distintos deltas (calibrados con skew real) =====
@@ -1422,7 +1499,8 @@ const TOOLTIPS = {
   sizing: { title: 'Tamaño de posición', body: 'Calcula cuántos contratos podés operar según tu cuenta y tolerancia al riesgo. Considera: max loss por contrato, % del capital expuesto, regla PDT (Pattern Day Trader si <$25K cuenta margin). Si dice "0 contratos recomendados", la estrategia no es apta para tu cuenta — buscá un underlying más chico o esperá acumular capital.' },
   broker: { title: 'Pasos en tu broker', body: 'Guía exacta paso a paso para ejecutar la orden en tu broker preferido. Cada broker tiene UI distinta. Robinhood requiere Options Level 3 (spreads). Tastytrade y IBKR son más profesionales pero más complejos. La orden se envía como NET CREDIT con limit price = crédito objetivo.' },
   preset: { title: 'Preset de deltas', body: 'Define qué tan lejos del precio actual ponés las cortas. Conservador (Δ0.08): muy lejos, alta probabilidad de ganar pero crédito chico. Balanceado (Δ0.12/0.10): el sweet spot v2.0. Agresivo (Δ0.20/0.16): cerca del precio, más crédito pero más riesgo. Para cuenta $2K elegí Conservador.' },
-  daymode: { title: 'Modo día', body: 'Qué días de la semana operar. Estricto (solo Mar/Mié): el mejor histórico, max win rate. Estándar (Lun/Mié/Jue): la regla v2.0 original que evita Mar (vol post-FOMC) y Vie (pin/gap). Cualquier día: opera todos los días pero requiere score 9.5/10 (más oportunidades pero menos selectivo).' }
+  daymode: { title: 'Modo día', body: 'Qué días de la semana operar. Estricto (solo Mar/Mié): el mejor histórico, max win rate. Estándar (Lun/Mié/Jue): la regla v2.0 original que evita Mar (vol post-FOMC) y Vie (pin/gap). Cualquier día: opera todos los días pero requiere score 9.5/10 (más oportunidades pero menos selectivo).' },
+  institutional: { title: 'Niveles institucionales (Open Interest)', body: 'Open Interest = cantidad de contratos de opciones abiertos sin cerrar. Strikes con OI muy alto son MUROS — actúan como soporte (puts) o resistencia (calls). Las instituciones (hedge funds, dealers, market makers) suelen acumular posiciones en strikes específicos como hedge o speculation. Si tus shorts coinciden con muros de OI, hay PINNING (el precio tiende a quedarse cerca, te beneficia). Si están entre muros, hay más libertad de movimiento (tu IC tiene espacio para respirar). El Max Pain es el strike donde la mayor cantidad de contratos expiran worthless — el precio tiende a gravitar hacia ahí cerca del cierre. Put/Call ratio < 0.7 = bullish (más calls), > 1.0 = bearish (más puts hedging).' }
 };
 
 // ===== Contenido EDUCATIVO desplegable =====
@@ -1570,7 +1648,29 @@ Asumiendo 12 trades/mes con cuenta $2K = +$95/mes ≈ <b>+4.7% mensual</b> = ~<b
 <br><br><b>Para tu cuenta de $2K, Iron Condor es la única opción razonable</b>. Iron Fly tiene riesgo similar pero menos margen de error. Strangle sin definir riesgo es financial suicide con esa cuenta.`
   },
   {
-    title: '🏛 ¿Dónde están las instituciones?',
+    title: '🏛 Open Interest y posicionamiento institucional REAL',
+    body: `<b>Open Interest (OI)</b> = cantidad de contratos de opciones abiertos sin cerrar. Es la huella digital institucional MÁS confiable y gratis.
+<br><br><b>Cómo leerlo</b>:
+<div class="formula">PUTS con OI alto BAJO el spot   = Soporte institucional
+                                  (funds compraron hedge)
+CALLS con OI alto SOBRE el spot = Resistencia institucional
+                                  (alguien vendió calls)
+Strike con MAX OI total         = "Max Pain" — gravitación
+                                  el último día</div>
+<b>Por qué importa para tu Iron Condor</b>:
+<br>• Si vendés tu corta call DONDE hay un muro de OI calls, tenés <b>doble protección</b>: el precio se frena ahí naturalmente (instituciones defienden el strike) Y vos cobraste prima en ese nivel.
+<br>• Si vendés entre muros (sin OI cerca), tu corta es más vulnerable a un movimiento direccional.
+<br><br><b>El sistema lo muestra automático</b> en la tarjeta "Niveles institucionales". Cuando ves tu strike en dorado coincidiendo con una barra grande, es señal positiva.
+<br><br><b>Max Pain teoría</b>: el día del vencimiento, el precio tiende a gravitar hacia el strike donde la mayor cantidad de contratos expiran worthless (los market makers ganan ese dinero). Para 1DTE, mirá Max Pain del expiry de mañana — si tu rango lo incluye, es bullish para tu IC.
+<br><br><b>Put/Call Ratio</b>: volumen total de puts / volumen total de calls hoy.
+<br>• &lt; 0.7 = bullish (más calls, especulación al alza)
+<br>• 0.7 - 1.0 = neutral
+<br>• &gt; 1.0 = bearish (más puts comprados como hedge)
+<br>Para Iron Condor preferimos neutral (0.8 - 1.0) — sin sesgo direccional fuerte.
+<br><br><b>Lo que NO podemos ver gratis</b>: gamma exposure (GEX), dealer positioning, vanna/charm. Eso requiere SpotGamma ($65/mes), MenthorQ ($199/mes) o Unusual Whales ($48/mes). Pero el OI gratis es 80% del valor.`
+  },
+  {
+    title: '🏛 ¿Dónde están las instituciones? (resumen)',
     body: `Las instituciones grandes (hedge funds, market makers, dealers) operan donde hay <b>liquidez profunda</b>:
 <br><br><b>Por subyacente</b>:
 <br>• <b>SPX</b>: institucional puro. 60% del volumen total de opciones US.
@@ -1761,7 +1861,99 @@ class MarketDataService {
     return out;
   }
 
+  // Fetch options chain de Yahoo — devuelve OI real por strike (= posicionamiento institucional)
+  async fetchOptionsChain(yahooSymbol) {
+    const cacheKey = 'oc:' + yahooSymbol;
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.t < 300000) return { ...cached.data, source: 'cached' }; // 5 min cache
+
+    const url = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(yahooSymbol)}`;
+    const text = await this.raceProxies(url, 7000);
+    const data = JSON.parse(text);
+    const result = data?.optionChain?.result?.[0];
+    if (!result) throw new Error('Sin options chain');
+    const opt = result.options?.[0];
+    if (!opt) throw new Error('Sin expiración disponible');
+
+    const out = {
+      expiration: opt.expirationDate * 1000, // unix → ms
+      strikes: result.strikes || [],
+      calls: (opt.calls || []).map(c => ({
+        strike: c.strike, oi: c.openInterest || 0, vol: c.volume || 0,
+        bid: c.bid, ask: c.ask, iv: c.impliedVolatility, delta: c.delta
+      })),
+      puts: (opt.puts || []).map(p => ({
+        strike: p.strike, oi: p.openInterest || 0, vol: p.volume || 0,
+        bid: p.bid, ask: p.ask, iv: p.impliedVolatility, delta: p.delta
+      })),
+      ts: Date.now()
+    };
+    this.cache.set(cacheKey, { t: Date.now(), data: out });
+    return out;
+  }
+
   resetDiagnostics() { this.diagnostics = { yahoo:0, stooq:0, manual:0, errors:[] }; }
+}
+
+// ============================================================================
+// CLASS: InstitutionalLevels - analiza Open Interest real
+// ============================================================================
+class InstitutionalLevels {
+  static analyze(chain, spot, calc) {
+    if (!chain || !spot) return null;
+
+    // Filtrar strikes en rango razonable (±5% del spot)
+    const range = spot * 0.05;
+    const inRange = (s) => s >= spot - range && s <= spot + range;
+
+    // Top OI puts (support levels) — debajo del spot
+    const supportLevels = chain.puts
+      .filter(p => p.strike < spot && inRange(p.strike) && p.oi > 0)
+      .sort((a, b) => b.oi - a.oi)
+      .slice(0, 5);
+
+    // Top OI calls (resistance levels) — arriba del spot
+    const resistanceLevels = chain.calls
+      .filter(c => c.strike > spot && inRange(c.strike) && c.oi > 0)
+      .sort((a, b) => b.oi - a.oi)
+      .slice(0, 5);
+
+    // Max Pain: strike donde la suma de OI × |intrinsic_value| es mínima
+    const allStrikes = [...new Set([...chain.calls.map(c => c.strike), ...chain.puts.map(p => p.strike)])];
+    let maxPainStrike = spot, maxPainValue = Infinity;
+    for (const k of allStrikes) {
+      let total = 0;
+      for (const c of chain.calls) total += c.oi * Math.max(0, k - c.strike);
+      for (const p of chain.puts) total += p.oi * Math.max(0, p.strike - k);
+      if (total < maxPainValue) { maxPainValue = total; maxPainStrike = k; }
+    }
+
+    // Put/Call ratio (volumen)
+    const putVol = chain.puts.reduce((s, p) => s + (p.vol || 0), 0);
+    const callVol = chain.calls.reduce((s, c) => s + (c.vol || 0), 0);
+    const pcRatio = callVol > 0 ? putVol / callVol : null;
+
+    // Total OI
+    const totalCallOI = chain.calls.reduce((s, c) => s + c.oi, 0);
+    const totalPutOI = chain.puts.reduce((s, p) => s + p.oi, 0);
+
+    // ¿Nuestros shorts coinciden con strikes de alto OI?
+    let shortCallNearWall = null, shortPutNearWall = null;
+    if (calc) {
+      const callWall = resistanceLevels.find(r => Math.abs(r.strike - calc.shortCall) <= calc.underlying.strikeIncrement);
+      const putWall = supportLevels.find(s => Math.abs(s.strike - calc.shortPut) <= calc.underlying.strikeIncrement);
+      shortCallNearWall = callWall;
+      shortPutNearWall = putWall;
+    }
+
+    return {
+      supportLevels, resistanceLevels,
+      maxPainStrike, pcRatio,
+      totalCallOI, totalPutOI,
+      shortCallNearWall, shortPutNearWall,
+      expiration: chain.expiration
+    };
+  }
 }
 
 // ============================================================================
@@ -1789,10 +1981,11 @@ class IronCondorStrategy {
     const shortPut  = this.roundToIncrement(spot - zPut * oneSD, u.strikeIncrement);
     const longPut   = shortPut - u.putWingWidth;
 
-    // Crédito estimado (empírico, ajustado por preset)
+    // Crédito estimado (empírico, ajustado por preset + IV boost de stocks)
     const isIndex = u.type === 'Index';
     const baseMul = preset.creditMultiplier;
-    const creditMul = isIndex && u.symbol !== 'XSP' ? baseMul * 10 : baseMul;
+    let creditMul = isIndex && u.symbol !== 'XSP' ? baseMul * 10 : baseMul;
+    if (u.creditMultiplierBoost) creditMul *= u.creditMultiplierBoost; // MSFT, etc.
     const creditPerShare = vix * creditMul * Math.sqrt(dte);
     const creditTotal = creditPerShare * 100;
     const creditOK = creditPerShare >= u.minCredit;
@@ -2010,7 +2203,13 @@ function nextBusinessDay() {
 // ============================================================================
 class AppState {
   constructor() {
-    this.activeUnderlyings = this.load('ic_active', ['SPY','QQQ','IWM']);
+    this.activeUnderlyings = this.load('ic_active', ['SPY','XSP','MSFT']);
+    // Migración: filtrar underlyings que ya no existen
+    this.activeUnderlyings = this.activeUnderlyings.filter(s => UNDERLYINGS[s]);
+    if (this.activeUnderlyings.length === 0) this.activeUnderlyings = ['SPY','XSP','MSFT'];
+    if (!UNDERLYINGS[this.load('ic_selected', 'SPY')]) {
+      localStorage.setItem('ic_selected', JSON.stringify('SPY'));
+    }
     this.selected = this.load('ic_selected', 'SPY');
     this.userInputs = this.load('ic_inputs', { geopoliticalCalm: false });
     this.history = this.load('ic_history', []);
@@ -2344,8 +2543,10 @@ class App {
     this.renderUnderlyings();
     this.startClock();
     this.loadTVChart();
+    this.loadOptionsChain();
     await this.refresh();
     setInterval(() => this.refresh(), 60000);
+    setInterval(() => this.loadOptionsChain(), 300000); // OI cada 5 min
     setInterval(() => this.updateClock(), 1000);
 
     // Tutorial automático en el primer load
@@ -2400,6 +2601,120 @@ class App {
     const sym = this.state.selected;
     const u = UNDERLYINGS[sym];
     if (u && u.tvSymbol) renderTradingViewChart('tvChartContainer', u.tvSymbol);
+  }
+
+  async loadOptionsChain() {
+    const sym = this.state.selected;
+    const u = UNDERLYINGS[sym];
+    if (!u) return;
+    const container = document.getElementById('institutionalContent');
+    if (!container) return;
+    try {
+      const chain = await this.dataService.fetchOptionsChain(u.yahoo);
+      this.optionsChain = chain;
+      this.renderInstitutionalLevels();
+    } catch (e) {
+      container.innerHTML = `
+        <div style="color:var(--text-muted);font-size:12px;padding:12px;text-align:center;">
+          ⚠ Options chain no disponible (${e.message}).<br>
+          Mientras tanto, podés ver OI manualmente en
+          <a href="https://finance.yahoo.com/quote/${u.yahoo}/options" target="_blank" style="color:var(--accent-gold);">Yahoo Options</a>
+          o <a href="https://www.barchart.com/stocks/quotes/${u.yahoo}/options" target="_blank" style="color:var(--accent-gold);">Barchart</a>.
+        </div>`;
+    }
+  }
+
+  renderInstitutionalLevels() {
+    const container = document.getElementById('institutionalContent');
+    if (!container || !this.optionsChain) return;
+    const sym = this.state.selected;
+    const u = UNDERLYINGS[sym];
+    const md = this.marketData[sym];
+    const spot = md?.price || parseFloat(document.getElementById('spotInput').value);
+    if (!spot) return;
+
+    const calc = this.scores[sym]?.calc;
+    const levels = InstitutionalLevels.analyze(this.optionsChain, spot, calc);
+    if (!levels) { container.innerHTML = '<div>Sin datos para analizar.</div>'; return; }
+
+    const expDate = new Date(levels.expiration).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    const pcLabel = levels.pcRatio == null ? '—' :
+      levels.pcRatio < 0.7 ? `${levels.pcRatio.toFixed(2)} (bullish)` :
+      levels.pcRatio > 1.0 ? `${levels.pcRatio.toFixed(2)} (bearish)` :
+      `${levels.pcRatio.toFixed(2)} (neutral)`;
+
+    const maxOI = Math.max(
+      ...levels.supportLevels.map(s => s.oi),
+      ...levels.resistanceLevels.map(r => r.oi),
+      1
+    );
+
+    const fmtOI = (n) => n >= 1000 ? (n/1000).toFixed(1) + 'k' : n.toString();
+    const dist = (s) => ((s - spot) / spot * 100);
+
+    const renderBar = (item, type) => {
+      const isOurShort = (type === 'support' && calc && Math.abs(item.strike - calc.shortPut) <= u.strikeIncrement) ||
+                        (type === 'resistance' && calc && Math.abs(item.strike - calc.shortCall) <= u.strikeIncrement);
+      const widthPct = (item.oi / maxOI) * 100;
+      const distVal = dist(item.strike);
+      return `
+        <div class="inst-bar ${type}${isOurShort ? ' is-our-short' : ''}">
+          <div class="strike">${item.strike.toLocaleString()}</div>
+          <div class="visual"><div class="fill" style="width:${widthPct}%;"></div></div>
+          <div class="oi">${fmtOI(item.oi)}</div>
+          <div class="dist">${(distVal >= 0 ? '+' : '') + distVal.toFixed(1)}%</div>
+        </div>`;
+    };
+
+    let alertHtml = '';
+    if (levels.shortCallNearWall || levels.shortPutNearWall) {
+      const items = [];
+      if (levels.shortCallNearWall) items.push(`Short Call <b>${calc.shortCall}</b> coincide con resistance institucional (${fmtOI(levels.shortCallNearWall.oi)} OI)`);
+      if (levels.shortPutNearWall) items.push(`Short Put <b>${calc.shortPut}</b> coincide con support institucional (${fmtOI(levels.shortPutNearWall.oi)} OI)`);
+      alertHtml = `<div class="inst-alert good">✅ <b>Strikes alineados con muros institucionales</b>: ${items.join(' · ')}. Estos niveles tienden a actuar como pinning, lo que favorece a tu Iron Condor.</div>`;
+    } else if (calc) {
+      alertHtml = `<div class="inst-alert warn">⚠ Tus shorts (Call ${calc.shortCall} / Put ${calc.shortPut}) NO coinciden con muros de OI grandes. No es necesariamente malo, pero menos pinning de las instituciones.</div>`;
+    }
+
+    if (calc && (calc.shortCall < levels.maxPainStrike || calc.shortPut > levels.maxPainStrike)) {
+      // Max pain está dentro o fuera del rango — informativo
+    }
+
+    container.innerHTML = `
+      <div class="inst-summary">
+        <div class="inst-stat">
+          <div class="label">Max Pain</div>
+          <div class="value">${levels.maxPainStrike}</div>
+          <div class="sub">${(((levels.maxPainStrike - spot) / spot) * 100).toFixed(1)}% vs spot</div>
+        </div>
+        <div class="inst-stat">
+          <div class="label">Put/Call ratio</div>
+          <div class="value">${pcLabel.split(' ')[0]}</div>
+          <div class="sub">${pcLabel.split(' ').slice(1).join(' ').replace(/[()]/g,'')}</div>
+        </div>
+        <div class="inst-stat">
+          <div class="label">Total OI</div>
+          <div class="value">${fmtOI(levels.totalCallOI + levels.totalPutOI)}</div>
+          <div class="sub">${fmtOI(levels.totalCallOI)}C / ${fmtOI(levels.totalPutOI)}P</div>
+        </div>
+      </div>
+
+      <div class="inst-section">
+        <div class="inst-section-title">🛡 Soporte (top puts OI · pos. de funds comprando hedge)</div>
+        ${levels.supportLevels.length > 0 ? levels.supportLevels.map(p => renderBar(p, 'support')).join('') : '<div style="color:var(--text-muted);font-size:11px;">Sin datos de OI en este rango.</div>'}
+      </div>
+
+      <div class="inst-section">
+        <div class="inst-section-title">🚧 Resistencia (top calls OI · pos. de calls vendidas)</div>
+        ${levels.resistanceLevels.length > 0 ? levels.resistanceLevels.map(c => renderBar(c, 'resistance')).join('') : '<div style="color:var(--text-muted);font-size:11px;">Sin datos de OI en este rango.</div>'}
+      </div>
+
+      ${alertHtml}
+
+      <div style="font-size:10px;color:var(--text-muted);margin-top:10px;line-height:1.5;">
+        Vencimiento mostrado: <b>${expDate}</b>. Datos de Yahoo Finance options API. OI = Open Interest = contratos abiertos sin cerrar. Strikes en dorado = tus shorts calculados.
+      </div>
+    `;
   }
 
   renderEducation() {
@@ -2538,6 +2853,7 @@ class App {
       this.recalculateAll();
       this.renderDetail();
       this.loadTVChart();
+      this.loadOptionsChain();
     });
     ['spotInput','volInput','vix9dInput','prevDayInput','dteInput'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => {
@@ -2577,15 +2893,23 @@ class App {
       this.renderUnderlyings();
       this.renderComparator();
     });
-    // Hero buttons
-    document.getElementById('heroExecuteBtn').addEventListener('click', () => {
-      document.querySelector('.section-tab[data-tab="detail"]')?.click();
-      document.getElementById('orderCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    document.getElementById('heroRobinhoodBtn').addEventListener('click', () => {
-      document.querySelector('.section-tab[data-tab="detail"]')?.click();
-      document.getElementById('brokerCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    // Hero buttons - con delay para que el tab cambie ANTES del scroll
+    const scrollToCard = (cardId) => {
+      const tabBtn = document.querySelector('.section-tab[data-tab="detail"]');
+      if (tabBtn && getComputedStyle(tabBtn).display !== 'none') tabBtn.click();
+      requestAnimationFrame(() => {
+        const el = document.getElementById(cardId);
+        if (el) {
+          // Pulse highlight para llamar la atención
+          el.style.transition = 'box-shadow 0.4s';
+          el.style.boxShadow = '0 0 0 2px var(--accent-gold)';
+          setTimeout(() => { el.style.boxShadow = ''; }, 1500);
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    };
+    document.getElementById('heroExecuteBtn').addEventListener('click', () => scrollToCard('orderCard'));
+    document.getElementById('heroRobinhoodBtn').addEventListener('click', () => scrollToCard('brokerCard'));
     document.getElementById('copyBtn').addEventListener('click', () => this.copyTicket());
     document.getElementById('sortBtn').addEventListener('click', () => this.cycleSort());
     document.getElementById('modalClose').addEventListener('click', () => this.closeModal());
@@ -2954,6 +3278,7 @@ class App {
     this.renderBrokerSteps(calc);
     this.renderHero();
     this.renderWarnings(calc, ev);
+    if (this.optionsChain) this.renderInstitutionalLevels();
 
     // Data age
     const age = this.lastUpdate ? `actualizado hace ${timeAgo(this.lastUpdate)}` : 'sin datos';
@@ -2974,10 +3299,18 @@ class App {
     bar.style.width = ev.percentage + '%';
     bar.style.background = ev.color === 'green' ? 'var(--success)' : ev.color === 'yellow' ? 'var(--warning)' : 'var(--danger)';
 
-    // Mostrar/ocultar bloques operables
-    const showOrder = ev.decision !== 'NO_OPERAR';
+    // Siempre visibles — agregamos warning interno si NO_OPERAR
     document.getElementById('strikesCard').style.display = '';
-    document.getElementById('orderCard').style.display = showOrder ? '' : 'none';
+    document.getElementById('orderCard').style.display = '';
+    // Indicador visual de "no operar" sobre la tarjeta de orden
+    const orderCard = document.getElementById('orderCard');
+    if (ev.decision === 'NO_OPERAR') {
+      orderCard.style.opacity = '0.55';
+      orderCard.style.filter = 'grayscale(0.4)';
+    } else {
+      orderCard.style.opacity = '';
+      orderCard.style.filter = '';
+    }
   }
 
   renderFilters(results) {
