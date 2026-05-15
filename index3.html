@@ -83,8 +83,6 @@ header{
 /* ================= LAYOUT ================= */
 .container{max-width:1900px;margin:0 auto;padding:14px 16px 80px}
 .grid{display:grid;gap:14px;grid-template-columns:1fr}
-@media(min-width:768px){.grid{grid-template-columns:1fr 1fr}}
-@media(min-width:1280px){.grid{grid-template-columns:300px 1fr 320px}}
 
 .col{display:flex;flex-direction:column;gap:14px}
 
@@ -102,43 +100,6 @@ header{
 .card-h h3{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
 .card-h .right{font-size:12px;color:var(--text-muted)}
 
-/* ================= HERO ================= */
-.hero{
-  background:linear-gradient(135deg,#131829 0%,#1a2138 100%);
-  border:2px solid var(--border);
-  border-radius:var(--r-xl);
-  padding:24px;
-  margin-bottom:14px;
-  position:relative;
-  overflow:hidden;
-}
-.hero.go{border-color:var(--success);box-shadow:0 0 40px rgba(16,185,129,.25)}
-.hero.go::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(16,185,129,.15),transparent 60%);pointer-events:none}
-.hero.warn{border-color:var(--warning);box-shadow:0 0 40px rgba(245,158,11,.25)}
-.hero.no{border-color:var(--danger);box-shadow:0 0 40px rgba(239,68,68,.2)}
-.hero-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:relative}
-.hero-icon{font-size:64px;line-height:1}
-.hero-text{flex:1;min-width:200px}
-.hero-decision{font-size:38px;font-weight:900;letter-spacing:.5px;line-height:1.1}
-.hero.go .hero-decision{color:var(--success)}
-.hero.warn .hero-decision{color:var(--warning)}
-.hero.no .hero-decision{color:var(--danger)}
-.hero-sub{color:var(--text-secondary);margin-top:6px;font-size:14px}
-.hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:18px}
-.hero-stat{background:rgba(0,0,0,.25);padding:10px 12px;border-radius:var(--r-md);border:1px solid var(--border)}
-.hero-stat .lbl{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
-.hero-stat .val{font-size:20px;font-weight:700;font-family:var(--font-mono);margin-top:2px}
-.hero-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
-.btn{padding:11px 18px;border-radius:var(--r-md);font-weight:700;font-size:13px;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.btn-primary{background:linear-gradient(135deg,var(--accent-gold),#f5c842);color:#0a0e1a}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-glow)}
-.btn-secondary{background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border)}
-.btn-secondary:hover{background:var(--bg-hover)}
-.btn-success{background:var(--success);color:#fff}
-.btn-danger{background:var(--danger);color:#fff}
-.btn-ghost{color:var(--text-secondary);background:transparent;border:1px dashed var(--border)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-
 /* ================= TABLE ================= */
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--border)}
@@ -146,41 +107,27 @@ th{color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacin
 td.mono{font-family:var(--font-mono)}
 .t-right{text-align:right}
 
-/* ================= TOOLTIP ================= */
-.tip{position:relative;display:inline-flex;align-items:center;gap:3px;cursor:help;border-bottom:1px dotted var(--text-muted)}
-
 /* ================= STATS BOX ================= */
 .stat-box{background:var(--bg-elevated);padding:8px;border-radius:var(--r-sm);text-align:center}
 .stat-box .lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase}
 .stat-box .val{font-size:16px;font-weight:700;font-family:var(--font-mono);margin-top:2px}
 
-/* ================= DISCLAIMER ================= */
-.disclaimer{
-  background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.3);
-  border-radius:var(--r-md);padding:12px 14px;font-size:12px;
-  color:var(--text-secondary);line-height:1.6;
-}
-.disclaimer b{color:var(--danger)}
-
 /* ================= MOBILE OPT ================= */
 @media(max-width:767px){
   .hero{padding:18px}
-  .hero-decision{font-size:30px}
-  .hero-icon{font-size:48px}
   .container{padding:10px 10px 80px}
   .card{padding:12px}
   .icon-btn{width:36px;height:36px}
 }
 
-/* Loading state */
-.loading-row td{
+/* Loading animation */
+@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+.loading{
   background:linear-gradient(90deg,var(--bg-elevated) 25%,var(--bg-hover) 50%,var(--bg-elevated) 75%);
   background-size:200px 100%;
   animation:shimmer 1.5s infinite;
   height:20px;
 }
-
-@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
 </style>
 </head>
 <body>
@@ -210,7 +157,9 @@ td.mono{font-family:var(--font-mono)}
     <div class="small muted" style="margin-bottom:8px">Top 5 strikes PUT con mayor Open Interest (soportes institucionales). Si tu short put coincide con un muro = pinning te favorece.</div>
     <table id="oiTable">
       <thead><tr><th>Strike</th><th>OI</th><th>Δ vs spot</th><th>Notas</th></tr></thead>
-      <tbody id="oiTableBody"></tbody>
+      <tbody id="oiTableBody">
+        <tr class="loading"><td colspan="4"></td></tr>
+      </tbody>
     </table>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
       <div class="stat-box"><div class="lbl">Max Pain</div><div class="val mono" id="maxPain">—</div></div>
@@ -225,14 +174,20 @@ td.mono{font-family:var(--font-mono)}
 // ========================== CONSTANTES ==========================
 
 const UNDERLYINGS = {
-  SPY:  { yahoo:'SPY',  minCapital:2000 },
-  XSP:  { yahoo:'^XSP', minCapital:2000 },
-  SPX:  { yahoo:'^SPX', minCapital:25000 },
-  QQQ:  { yahoo:'QQQ',  minCapital:3000 },
-  IWM:  { yahoo:'IWM',  minCapital:2000 },
-  NVDA: { yahoo:'NVDA', minCapital:5000 },
-  TSLA: { yahoo:'TSLA', minCapital:5000 }
+  SPY:  { yahoo:'SPY' },
+  XSP:  { yahoo:'^XSP' },
+  SPX:  { yahoo:'^SPX' },
+  QQQ:  { yahoo:'QQQ' },
+  IWM:  { yahoo:'IWM' },
+  NVDA: { yahoo:'NVDA' },
+  TSLA: { yahoo:'TSLA' }
 };
+
+const CORS_PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://cors.eu.org/${url}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`
+];
 
 // ========================== STATE ==========================
 
@@ -246,23 +201,49 @@ let state = {
 const $ = id => document.getElementById(id);
 const fmt = (n, d=2) => isFinite(n) ? n.toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d}) : '—';
 
+// ========================== FETCH WITH CORS RETRY ==========================
+
+async function fetchWithRetry(url, maxRetries = 3) {
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    try {
+      const proxiedUrl = CORS_PROXIES[i](url);
+      const response = await fetch(proxiedUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0'
+        }
+      });
+      
+      if (!response.ok) {
+        console.warn(`Proxy ${i} failed with status ${response.status}`);
+        continue;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.warn(`Proxy ${i} failed:`, error.message);
+      continue;
+    }
+  }
+  
+  throw new Error('All CORS proxies failed');
+}
+
 // ========================== FETCH YAHOO DATA ==========================
 
 async function fetchYahooFinanceData(symbol) {
   try {
-    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=optionChain`;
+    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=optionChain,price`;
     
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
-    const data = await response.json();
+    const data = await fetchWithRetry(url);
     
     if (data.quoteSummary?.result?.[0]?.optionChain?.result?.[0]) {
-      const optionData = data.quoteSummary.result[0].optionChain.result[0];
-      return optionData;
+      return data.quoteSummary.result[0].optionChain.result[0];
     }
     
-    throw new Error('No option chain data available');
+    console.error('Invalid response structure:', data);
+    throw new Error('No option chain data in response');
   } catch (error) {
     console.error('Error fetching Yahoo Finance data:', error);
     return null;
@@ -272,7 +253,7 @@ async function fetchYahooFinanceData(symbol) {
 // ========================== PROCESS OI DATA ==========================
 
 function processOpenInterestData(optionData) {
-  if (!optionData?.puts) {
+  if (!optionData?.puts || optionData.puts.length === 0) {
     return { topStrikes: [], spot: null, maxPain: null };
   }
 
@@ -280,23 +261,25 @@ function processOpenInterestData(optionData) {
   
   // Extract PUT options with OI
   const puts = optionData.puts
-    .filter(p => p.openInterest && p.openInterest > 0)
+    .filter(p => p.openInterest && p.openInterest > 0 && p.strike)
     .map(p => ({
-      strike: p.strike,
-      oi: p.openInterest,
+      strike: parseFloat(p.strike),
+      oi: parseInt(p.openInterest),
       delta: p.delta || 0,
-      lastPrice: p.lastPrice || 0
+      lastPrice: p.lastPrice || 0,
+      bid: p.bid || 0,
+      ask: p.ask || 0
     }))
     .sort((a, b) => b.oi - a.oi)
     .slice(0, 5); // Top 5
 
-  // Calculate Max Pain (simplified: highest OI strike)
+  // Calculate Max Pain (highest OI strike)
   const maxPain = puts.length > 0 ? puts[0].strike : spot;
 
   // Calculate delta vs spot for each strike
   const topStrikes = puts.map(p => ({
     ...p,
-    deltaVsSpot: ((spot - p.strike) / spot * 100).toFixed(2)
+    deltaVsSpot: spot > 0 ? ((spot - p.strike) / spot * 100).toFixed(2) : '0'
   }));
 
   return { topStrikes, spot, maxPain };
@@ -310,30 +293,33 @@ function renderOpenInterestTable(topStrikes, spot) {
 
   if (!topStrikes || topStrikes.length === 0) {
     const row = tbody.insertRow();
-    row.innerHTML = `<td colspan="4" style="text-align:center;color:var(--text-muted)">Options chain no disponible</td>`;
+    row.innerHTML = `<td colspan="4" style="text-align:center;color:var(--text-muted)">📊 Options chain no disponible</td>`;
     $('oiStatus').textContent = '⚠ Sin datos';
     return;
   }
 
   topStrikes.forEach(strike => {
     const row = tbody.insertRow();
+    
+    // Format OI
     const oiFormatted = strike.oi > 1000000 ? `${(strike.oi/1000000).toFixed(1)}M` : 
                         strike.oi > 1000 ? `${(strike.oi/1000).toFixed(0)}K` : 
                         strike.oi.toString();
     
+    // Notes: Check if strike is below spot (support level)
     const notes = spot > strike.strike 
       ? '✅ Soporte institucional' 
-      : '⚠ OTM';
+      : '⚠ OTM (Fuera del dinero)';
     
     row.innerHTML = `
       <td class="mono"><strong>$${strike.strike.toFixed(2)}</strong></td>
       <td class="mono">${oiFormatted}</td>
-      <td class="mono">${strike.deltaVsSpot}%</td>
+      <td class="mono"><span class="up">${strike.deltaVsSpot}%</span></td>
       <td>${notes}</td>
     `;
   });
 
-  $('oiStatus').textContent = `✅ ${topStrikes.length} strikes cargados`;
+  $('oiStatus').textContent = `✅ ${topStrikes.length} strikes | Spot: $${spot.toFixed(2)}`;
 }
 
 // ========================== MAIN LOAD ==========================
@@ -342,17 +328,21 @@ async function loadOpenInterest() {
   const statusEl = $('dataStatus');
   statusEl.innerHTML = '<span class="dot"></span>Cargando OI desde Yahoo…';
 
-  const symbol = UNDERLYINGS[state.selectedUnderlying]?.yahoo;
-  if (!symbol) {
-    statusEl.textContent = '❌ Símbolo no válido';
+  const underlying = UNDERLYINGS[state.selectedUnderlying];
+  if (!underlying) {
+    statusEl.innerHTML = '❌ Símbolo no válido';
     return;
   }
+
+  const symbol = underlying.yahoo;
+  console.log('Fetching data for symbol:', symbol);
 
   const optionData = await fetchYahooFinanceData(symbol);
   
   if (!optionData) {
-    statusEl.textContent = '❌ Error al cargar datos';
-    $('oiTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-danger)">Error al conectar con Yahoo Finance</td></tr>`;
+    statusEl.innerHTML = '❌ Error al cargar datos';
+    const tbody = $('oiTableBody');
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger)">❌ No se pudo conectar con Yahoo Finance</td></tr>`;
     return;
   }
 
@@ -364,19 +354,25 @@ async function loadOpenInterest() {
     $('maxPain').textContent = `$${maxPain.toFixed(2)}`;
   }
   
-  // Placeholder GEX (normalmente requeriría API especializada)
+  // GEX placeholder
   $('gexVal').textContent = '—';
   
-  statusEl.textContent = '✅ Datos cargados';
+  statusEl.innerHTML = '✅ Datos listos';
 }
 
 // ========================== EVENT LISTENERS ==========================
 
-$('btnRefresh').addEventListener('click', loadOpenInterest);
+$('btnRefresh').addEventListener('click', () => {
+  console.log('Refresh clicked');
+  loadOpenInterest();
+});
 
 // ========================== INIT ==========================
 
-document.addEventListener('DOMContentLoaded', loadOpenInterest);
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, fetching data...');
+  loadOpenInterest();
+});
 
 </script>
 </body>
